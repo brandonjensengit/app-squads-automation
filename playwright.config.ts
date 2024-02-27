@@ -1,10 +1,13 @@
 import { defineConfig, devices } from '@playwright/test';
+import path from 'path';
 
 /**
  * Read environment variables from file.
  * https://github.com/motdotla/dotenv
  */
 // require('dotenv').config();
+
+export const STORAGE_STATE = path.join(__dirname, 'playwright/.auth/user.json');
 
 /**
  * See https://playwright.dev/docs/test-configuration.
@@ -24,29 +27,49 @@ export default defineConfig({
   /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
   use: {
     /* Base URL to use in actions like `await page.goto('/')`. */
-    // baseURL: 'http://127.0.0.1:3000',
+    baseURL: 'https://app.squads.so/',
 
     /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
     trace: 'on-first-retry',
     permissions: ['clipboard-read'],
+    
   },
 
   /* Configure projects for major browsers */
   projects: [
     {
+      name: 'setup',
+      testMatch: 'tests/setup.spec.ts',
+    },
+    {
+      name: 'e2e tests logged in',
+      testMatch: 'tests/*loggedin.spec.ts',
+      dependencies: ['setup'],
+      use: {
+        storageState: STORAGE_STATE,
+      }
+    },
+    {
       name: 'chromium',
-      use: { ...devices['Desktop Chrome'] },
+      use: { ...devices['Desktop Chrome'],
+        launchOptions: {
+          args: [
+            //`--disable-extensions-except=${path.join(__dirname, './phantom')}`,
+            //`--load-extension=${path.join(__dirname, './phantom')}`,
+          ],
+        }
+     },
     },
 
-    {
-      name: 'firefox',
-      use: { ...devices['Desktop Firefox'] },
-    },
+    // {
+    //   name: 'firefox',
+    //   use: { ...devices['Desktop Firefox'] },
+    // },
 
-    {
-      name: 'webkit',
-      use: { ...devices['Desktop Safari'] },
-    },
+    // {
+    //   name: 'webkit',
+    //   use: { ...devices['Desktop Safari'] },
+    // },
 
     /* Test against mobile viewports. */
     // {
@@ -65,7 +88,18 @@ export default defineConfig({
     // },
     // {
     //   name: 'Google Chrome',
-    //   use: { ...devices['Desktop Chrome'], channel: 'chrome' },
+    //   use: {
+    //     ...devices['Desktop Chrome'],
+    //     // Specify using the real Google Chrome browser, not Chromium
+    //     channel: 'chrome',
+    //     launchOptions: {
+    //       args: [
+    //         // Specify any arguments you need for launching Chrome
+    //         `--disable-extensions-except=${path.join(__dirname, './phantom')}`,
+    //         `--load-extension=${path.join(__dirname, './phantom')}`,
+    //       ],
+    //     },
+    //   },
     // },
   ],
 

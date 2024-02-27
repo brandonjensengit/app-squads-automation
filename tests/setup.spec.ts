@@ -1,12 +1,13 @@
 import { test, expect } from '@playwright/test';
 require('dotenv').config();
+import { STORAGE_STATE } from '../playwright.config'
 
 test('full wallet connection with popup handling', async ({ browser }) => {
   const context = await browser.newContext();
   const squadsPage = await context.newPage();
 
   // Navigate to the Squads app
-  await squadsPage.goto('https://app.squads.so/squads');
+  await squadsPage.goto('/hello');
 
   // Click on the Connect button
   await squadsPage.getByRole('button', { name: 'Connect' }).nth(1).click();
@@ -56,25 +57,29 @@ test('full wallet connection with popup handling', async ({ browser }) => {
 
   // Verify public wallet address matches
   await squadsPage.getByRole('button', { name: 'BTnJ…ZTAj' }).isVisible();
-  
+  await squadsPage.context().storageState({ path: STORAGE_STATE });
+
+  // Prep for next tests
+  await squadsPage.bringToFront();
+
   // Create a squad
-  await squadsPage.getByRole('button', { name: 'Create Squad' }).click();
-  await squadsPage.getByPlaceholder('Squad name').click();
-  await squadsPage.getByPlaceholder('Squad name').fill('one member squad');
-  await squadsPage.getByPlaceholder('Description (max 64').click();
-  await squadsPage.getByPlaceholder('Description (max 64').fill('one member squad');
-  await squadsPage.getByRole('button', { name: 'Next' }).click();
-  await expect(squadsPage.getByText('1', { exact: true })).toBeVisible();
+  // await squadsPage.getByRole('button', { name: 'Create Squad' }).click();
+  // await squadsPage.getByPlaceholder('Squad name').click();
+  // await squadsPage.getByPlaceholder('Squad name').fill('one member squad');
+  // await squadsPage.getByPlaceholder('Description (max 64').click();
+  // await squadsPage.getByPlaceholder('Description (max 64').fill('one member squad');
+  // await squadsPage.getByRole('button', { name: 'Next' }).click();
+  // await expect(squadsPage.getByText('1', { exact: true })).toBeVisible();
 
-  await squadsPage.getByRole('button', { name: 'Next' }).click();
-  await expect(squadsPage.locator('body')).toContainText('1/1');
-  await squadsPage.getByRole('button', { name: 'Confirm' }).click();
+  // await squadsPage.getByRole('button', { name: 'Next' }).click();
+  // await expect(squadsPage.locator('body')).toContainText('1/1');
+  // await squadsPage.getByRole('button', { name: 'Confirm' }).click();
 
-  // Load new popup for transaction confirmation
-  const newWalletConfirmPromise = squadsPage.waitForEvent('popup');
-  const newWalletConfirm = await newWalletConfirmPromise;
-  await newWalletConfirm.getByRole('button', { name: 'Confirm' }).click();
-  await newWalletConfirm.getByRole('button', { name: 'Approve' }).click();
+  // // Load new popup for transaction confirmation
+  // const newWalletConfirmPromise = squadsPage.waitForEvent('popup');
+  // const newWalletConfirm = await newWalletConfirmPromise;
+  // await newWalletConfirm.getByRole('button', { name: 'Confirm' }).click();
+  // await newWalletConfirm.getByRole('button', { name: 'Approve' }).click();
 
   // Cleanup: Close pages or context if necessary
   // await solflarePage.close();
